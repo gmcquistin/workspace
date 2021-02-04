@@ -1,21 +1,27 @@
-name: Deploy master
+name: Deploy branch to Elastic Beanstalk
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Bump Version
+        default: v1.0.0
+        required: true
   push:
     branches:
-    - master
+      - master
     
 jobs:
-  build:
+  deploy:
+    name: Deploy to Elastic Beanstalk
     runs-on: ubuntu-latest
     steps:
-    
     - name: Checkout source code
       uses: actions/checkout@v1
 
     - name: Generate deployment package
       run: zip -r deploy.zip . -x '*.git*'
       
-    - name: Deploy to EB
+    - name: Deploy to Elastic Beanstalk
       uses: einaregilsson/beanstalk-deploy@v14
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -24,4 +30,4 @@ jobs:
         environment_name: staging
         version_label: ${{ github.sha }}
         region: eu-west-1
-        deployment_package: deploy.zip
+        deployment_package: deployment_package.zip
