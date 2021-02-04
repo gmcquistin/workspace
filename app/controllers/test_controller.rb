@@ -1,5 +1,5 @@
 class TestController < ApplicationController
-    def index
-        render plain: "Hello, world"
-    end
+  def index
+    render plain: 'Hello from Elastic Beanstalk!'
+  end
 end
