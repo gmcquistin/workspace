@@ -1,10 +1,10 @@
-name: Deploy branch to Elastic Beanstalk
+name: Deploy to Elastic Beanstalk (${{ github.event.inputs.env || 'staging' }})
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: Bump Version
-        default: v1.0.0
+      env:
+        description: Environment
+        default: staging
         required: true
   push:
     branches:
@@ -18,8 +18,14 @@ jobs:
     - name: Checkout source code
       uses: actions/checkout@v1
 
+    - name: Save current time
+      id: time
+      uses: nanzm/get-time-action@v1.1
+      with:
+        format: 'YYYY-MM-DD-HH-mm-ss'
+
     - name: Generate deployment package
-      run: zip -r deploy.zip . -x '*.git*'
+      run: zip -r deployment_package.zip . -x '*.git*'
       
     - name: Deploy to Elastic Beanstalk
       uses: einaregilsson/beanstalk-deploy@v14
@@ -27,7 +33,7 @@ jobs:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: vetchex
-        environment_name: staging
-        version_label: ${{ github.sha }}
+        environment_name: ${{ github.event.inputs.env || 'staging' }}
+        version_label: ${{ github.sha }}-${{ steps.time.outputs.time }}
         region: eu-west-1
         deployment_package: deployment_package.zip
